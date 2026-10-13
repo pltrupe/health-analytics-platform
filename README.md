@@ -4,7 +4,7 @@ An end-to-end analytics product over Apple Health data. An iPhone Health export 
 **Databricks** through Unity Catalog **Volumes** and **`COPY INTO`**, modeled with **PySpark** into
 bronze, silver and gold Delta tables, and served through a **React + Recharts** dashboard on **Vercel**.
 
-**Live dashboard:** _link added after the first Vercel deploy_
+**Live dashboard:** https://health-analytics-platform-two.vercel.app/
 
 > The published data is **synthetic**. [`generator/generate_export.py`](generator/generate_export.py)
 > writes a year of Apple Health data in Apple's exact export format for a fictional runner
