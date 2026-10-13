@@ -1,0 +1,14 @@
+# raw XML is regenerated from the committed zip; real exports never go in git
+data/sample/export.xml
+data/private/
+*.xml
+!databricks.yml
+
+# build / tooling
+node_modules/
+dashboard/dist/
+.databricks/
+.vercel/
+__pycache__/
+.venv/
+.DS_Store

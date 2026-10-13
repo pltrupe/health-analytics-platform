@@ -1,0 +1,60 @@
+# Databricks Asset Bundle: deploys the notebooks and a serverless job that runs
+# landing zip -> bronze (COPY INTO) -> silver -> gold -> dashboard JSON.
+#
+#   databricks bundle deploy
+#   databricks bundle run health_pipeline
+#
+# Works on Databricks Free Edition (serverless, Unity Catalog "workspace" catalog).
+
+bundle:
+  name: health-analytics-platform
+
+variables:
+  catalog:
+    description: Unity Catalog catalog to build into
+    default: workspace
+  schema:
+    description: Schema that holds the volumes and all bronze/silver/gold tables
+    default: health
+
+resources:
+  jobs:
+    health_pipeline:
+      name: health-analytics-pipeline
+      description: Apple Health export -> Delta medallion tables -> dashboard JSON
+      max_concurrent_runs: 1
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: schema
+          default: ${var.schema}
+      tasks:
+        - task_key: setup
+          notebook_task:
+            notebook_path: ./databricks/notebooks/00_setup.py
+        - task_key: bronze_ingest
+          depends_on: [{ task_key: setup }]
+          notebook_task:
+            notebook_path: ./databricks/notebooks/01_bronze_ingest.py
+        - task_key: silver_model
+          depends_on: [{ task_key: bronze_ingest }]
+          notebook_task:
+            notebook_path: ./databricks/notebooks/02_silver_model.py
+        - task_key: gold_model
+          depends_on: [{ task_key: silver_model }]
+          notebook_task:
+            notebook_path: ./databricks/notebooks/03_gold_model.py
+        - task_key: export_dashboard
+          depends_on: [{ task_key: gold_model }]
+          notebook_task:
+            notebook_path: ./databricks/notebooks/04_export_dashboard.py
+
+targets:
+  dev:
+    mode: development
+    default: true
+
+sync:
+  exclude:
+    - data/**
+    - dashboard/**
